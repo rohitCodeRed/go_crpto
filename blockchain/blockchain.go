@@ -1,4 +1,4 @@
-package main
+package blockchain
 
 import (
 	"crypto/sha256"
@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/rohitCodeRed/go_crypto/model"
 )
 
@@ -27,6 +28,8 @@ import (
 // 	TRANSACTIONS  []transaction
 // }
 
+var aDDRESS string
+
 type node struct {
 	url string
 }
@@ -35,13 +38,15 @@ var CHAIN []model.Block
 var TRANSACTIONS []model.Transaction
 var nodes []node
 
-func New() {
+func New() string {
 	CHAIN = []model.Block{}
 	TRANSACTIONS = []model.Transaction{}
-	create_block(1, "0")
+	Create_block(1, "0")
+	aDDRESS := uuid.New().String()
+	return aDDRESS
 }
 
-func create_block(proof int, previous_hash string) {
+func Create_block(proof int, previous_hash string) {
 
 	newBlock := model.Block{Index: len(CHAIN),
 		Proof:         proof,
@@ -59,7 +64,7 @@ func Get_previous_block() model.Block {
 	return CHAIN[len(CHAIN)-1]
 }
 
-func proof_of_work(previous_proof int) int {
+func Proof_of_work(previous_proof int) int {
 	new_proof := 1
 	checkProof := false
 
@@ -122,7 +127,7 @@ func is_chain_valid(pChain []model.Block) bool {
 	return true
 }
 
-func add_transaction(sender string, reciever string, amount int) int {
+func Add_transaction(sender string, reciever string, amount int) int {
 	pTransaction := model.Transaction{Sender: sender, Reciever: reciever, Amount: amount}
 	TRANSACTIONS = append(TRANSACTIONS, pTransaction)
 	prevBlock := Get_previous_block()
@@ -171,4 +176,8 @@ func replace_node_chain() (bool, error) {
 	}
 
 	return false, nil
+}
+
+func GetUuidAddress() string {
+	return aDDRESS
 }
