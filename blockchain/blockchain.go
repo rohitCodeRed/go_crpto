@@ -28,25 +28,21 @@ import (
 // 	TRANSACTIONS  []transaction
 // }
 
-var aDDRESS string
-
-type node struct {
-	url string
-}
+var uUUID string
 
 var CHAIN []model.Block
 var TRANSACTIONS []model.Transaction
-var nodes []node
+var NODES []model.Node
 
 func New() string {
 	CHAIN = []model.Block{}
 	TRANSACTIONS = []model.Transaction{}
 	Create_block(1, "0")
-	aDDRESS := uuid.New().String()
-	return aDDRESS
+	uUUID := uuid.New().String()
+	return uUUID
 }
 
-func Create_block(proof int, previous_hash string) {
+func Create_block(proof int, previous_hash string) model.Block {
 
 	newBlock := model.Block{Index: len(CHAIN),
 		Proof:         proof,
@@ -57,6 +53,7 @@ func Create_block(proof int, previous_hash string) {
 	TRANSACTIONS = []model.Transaction{}
 
 	CHAIN = append(CHAIN, newBlock)
+	return newBlock
 
 }
 
@@ -100,7 +97,7 @@ func Hash(pBlock model.Block) string {
 
 }
 
-func is_chain_valid(pChain []model.Block) bool {
+func Is_chain_valid(pChain []model.Block) bool {
 	previous_block := CHAIN[0]
 	block_index := 1
 	for block_index > len(CHAIN) {
@@ -135,19 +132,19 @@ func Add_transaction(sender string, reciever string, amount int) int {
 	return prevBlock.Index
 }
 
-func add_node(address string) {
-	pNode := node{url: address}
-	nodes = append(nodes, pNode)
+func Add_node(node *model.Node) {
+	pNode := model.Node{Address: node.Address, Name: node.Name}
+	NODES = append(NODES, pNode)
 }
 
-func replace_node_chain() (bool, error) {
-	//networks := nodes
+func Replace_node_chain() bool {
+	//networks := NODES
 	longest_chain := []model.Block{}
 	max_length := len(CHAIN)
 
-	for _, node := range nodes {
-		url := node.url
-		resp, err := http.Get("http://" + url + "/get_chain")
+	for _, node := range NODES {
+		url := node.Address
+		resp, err := http.Get(url + "/get_chain")
 		if err != nil {
 			log.Fatalln(err)
 		}
@@ -163,7 +160,7 @@ func replace_node_chain() (bool, error) {
 		pChain := cResp.Chain
 
 		//create
-		if length > max_length && is_chain_valid(pChain) {
+		if length > max_length && Is_chain_valid(pChain) {
 			max_length = length
 			longest_chain = pChain
 		}
@@ -172,12 +169,12 @@ func replace_node_chain() (bool, error) {
 
 	if len(longest_chain) > 0 {
 		CHAIN = longest_chain
-		return true, nil
+		return true
 	}
 
-	return false, nil
+	return false
 }
 
 func GetUuidAddress() string {
-	return aDDRESS
+	return uUUID
 }

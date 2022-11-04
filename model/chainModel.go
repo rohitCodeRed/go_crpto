@@ -5,6 +5,11 @@ import (
 	"fmt"
 )
 
+type Node struct {
+	Address string `json:"address"`
+	Name    string `json:"name"`
+}
+
 type Transaction struct {
 	Sender   string `json:"sender"`
 	Reciever string `json:"reciever"`
