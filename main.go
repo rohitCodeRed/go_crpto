@@ -11,12 +11,14 @@ import (
 )
 
 func main() {
-	node_address := blockchain.New()
-	fmt.Println("Server Unique Address: ", node_address)
+	var b blockchain.BlockChain
+	b.New()
+	fmt.Println("Server Unique Address: ", b.GetUuidAddress())
+	//fmt.Println(node_address)
 
 	server := &http.Server{
 		Addr:         ":4000",
-		Handler:      routes.Router(),
+		Handler:      routes.Router(&b),
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
 	}

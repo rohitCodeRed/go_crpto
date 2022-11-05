@@ -11,7 +11,7 @@ import (
 	"github.com/rohitCodeRed/go_crypto/controllers"
 )
 
-func Router() http.Handler {
+func Router(b *blockchain.BlockChain) http.Handler {
 	r := gin.New()
 
 	r.Use(gin.LoggerWithFormatter(func(param gin.LogFormatterParams) string {
@@ -32,7 +32,7 @@ func Router() http.Handler {
 
 	// Recovery middleware recovers from any panics and writes a 500 if there was one.
 	r.Use(gin.Recovery())
-	r.Use(Authenticate())
+	r.Use(Authenticate(b))
 
 	// routes := e.Group("/api")
 	// {
@@ -45,24 +45,36 @@ func Router() http.Handler {
 			http.StatusOK,
 			gin.H{
 				"code":    http.StatusOK,
-				"message": "Welcome to Crypto currency rocoin Node with address: " + blockchain.GetUuidAddress(),
+				"message": "Welcome to Crypto currency rocoin Node with address: " + b.GetUuidAddress(),
 			},
 		)
 	})
 
 	r.POST("/login", controllers.Login)
 
-	r.POST("/mine_block", controllers.MineBlock)
+	r.POST("/mine_block", func(c *gin.Context) {
+		controllers.MineBlock(c, b)
+	})
 
-	r.GET("/get_chain", controllers.GetChain)
+	r.GET("/get_chain", func(c *gin.Context) {
+		controllers.GetChain(c, b)
+	})
 
-	r.GET("/is_valid", controllers.IsChainValid)
+	r.GET("/is_valid", func(c *gin.Context) {
+		controllers.IsChainValid(c, b)
+	})
 
-	r.GET("/add_transaction", controllers.AddTransaction)
+	r.GET("/add_transaction", func(c *gin.Context) {
+		controllers.AddTransaction(c, b)
+	})
 
-	r.POST("/connect_node", controllers.ConnectNode)
+	r.POST("/connect_node", func(c *gin.Context) {
+		controllers.ConnectNode(c, b)
+	})
 
-	r.GET("/replace_chain", controllers.Replace_chain)
+	r.GET("/replace_chain", func(c *gin.Context) {
+		controllers.Replace_chain(c, b)
+	})
 
 	return r
 }
@@ -73,21 +85,27 @@ type AuthHeader struct {
 	ContentType   string `header:"Content-Type"`
 }
 
-func Authenticate() gin.HandlerFunc {
+func Authenticate(b *blockchain.BlockChain) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		t := time.Now()
 		h := AuthHeader{}
 
 		if err := c.ShouldBindHeader(&h); err != nil {
-			log.Println(err)
+			log.Println(err, "header not found..")
 			//c.JSON(http.StatusOK, err)
+			c.Set("authenticated", false)
+		} else {
+			log.Println("Header found!..")
+			c.Set("authenticated", true)
 		}
+
+		log.Println("Node Address: ", b.GetUuidAddress())
 
 		//TODO get userId...
 
 		// Set example variable
-		c.Set("userId", "12345")
-		c.Set("node_address", blockchain.GetUuidAddress())
+		c.Set("userId", "rohit")
+		c.Set("node_address", b.GetUuidAddress())
 
 		// before request
 

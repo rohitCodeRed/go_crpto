@@ -9,17 +9,17 @@ import (
 	"github.com/rohitCodeRed/go_crypto/model"
 )
 
-func MineBlock(c *gin.Context) {
-	previous_block := blockchain.Get_previous_block()
+func MineBlock(c *gin.Context, b *blockchain.BlockChain) {
+	previous_block := b.Get_previous_block()
 	previous_proof := previous_block.Proof
 	proof := blockchain.Proof_of_work(previous_proof)
 	previous_hash := blockchain.Hash(previous_block)
-	sender := blockchain.GetUuidAddress()
+	sender := b.GetUuidAddress()
 	reciever := "you"
 	amount := 1
-	blockchain.Add_transaction(sender, reciever, amount)
+	b.Add_transaction(sender, reciever, amount)
 
-	block := blockchain.Create_block(proof, previous_hash)
+	block := b.Create_block(proof, previous_hash)
 
 	c.JSON(http.StatusOK, gin.H{"message": "Block Mined succesfully",
 		"index":         block.Index,
@@ -30,15 +30,15 @@ func MineBlock(c *gin.Context) {
 
 }
 
-func GetChain(c *gin.Context) {
-	block := blockchain.CHAIN
+func GetChain(c *gin.Context, b *blockchain.BlockChain) {
+	block := b.CHAIN
 	c.JSON(http.StatusOK, gin.H{
 		"chain":  block,
 		"length": len(block)})
 }
 
-func IsChainValid(c *gin.Context) {
-	is_valid := blockchain.Is_chain_valid(blockchain.CHAIN)
+func IsChainValid(c *gin.Context, b *blockchain.BlockChain) {
+	is_valid := b.Is_chain_valid(b.CHAIN)
 	if is_valid {
 		c.JSON(http.StatusOK, gin.H{
 			"message": "All good. The Blockchain is valid."})
@@ -54,20 +54,20 @@ type transaction struct {
 	Amount   int    `json:"amount"`
 }
 
-func AddTransaction(c *gin.Context) {
+func AddTransaction(c *gin.Context, b *blockchain.BlockChain) {
 	var data model.Transaction
 	if err := c.ShouldBindJSON(&data); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	index := blockchain.Add_transaction(data.Sender, data.Reciever, data.Amount)
+	index := b.Add_transaction(data.Sender, data.Reciever, data.Amount)
 	c.JSON(http.StatusOK, gin.H{
 		"message": "This transaction will be added to Block with index: " + strconv.Itoa(index)})
 
 }
 
-func ConnectNode(c *gin.Context) {
+func ConnectNode(c *gin.Context, b *blockchain.BlockChain) {
 	var nodes []model.Node
 
 	if err := c.ShouldBindJSON(&nodes); err != nil {
@@ -76,7 +76,7 @@ func ConnectNode(c *gin.Context) {
 	}
 
 	for _, node := range nodes {
-		blockchain.Add_node(&node)
+		b.Add_node(&node)
 	}
 
 	c.JSON(http.StatusOK, gin.H{
@@ -84,8 +84,8 @@ func ConnectNode(c *gin.Context) {
 
 }
 
-func Replace_chain(c *gin.Context) {
-	is_chain_replaced := blockchain.Replace_node_chain()
+func Replace_chain(c *gin.Context, b *blockchain.BlockChain) {
+	is_chain_replaced := b.Replace_node_chain()
 	if !is_chain_replaced {
 		c.JSON(http.StatusOK, gin.H{"message": "No need to replace chain."})
 		return
