@@ -21,11 +21,11 @@ type BlockChain struct {
 	Uuid         string              `json:"uuid"`
 }
 
-var Uuuid string
+// var Uuuid string
 
-var CHAIN []model.Block
-var TRANSACTIONS []model.Transaction
-var NODES []model.Node
+// var CHAIN []model.Block
+// var TRANSACTIONS []model.Transaction
+// var NODES []model.Node
 
 func (b *BlockChain) New() string {
 	b.CHAIN = []model.Block{}
