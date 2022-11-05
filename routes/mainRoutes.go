@@ -52,7 +52,7 @@ func Router(b *blockchain.BlockChain) http.Handler {
 
 	r.POST("/login", controllers.Login)
 
-	r.POST("/mine_block", func(c *gin.Context) {
+	r.GET("/mine_block", func(c *gin.Context) {
 		controllers.MineBlock(c, b)
 	})
 
@@ -64,7 +64,7 @@ func Router(b *blockchain.BlockChain) http.Handler {
 		controllers.IsChainValid(c, b)
 	})
 
-	r.GET("/add_transaction", func(c *gin.Context) {
+	r.POST("/add_transaction", func(c *gin.Context) {
 		controllers.AddTransaction(c, b)
 	})
 
