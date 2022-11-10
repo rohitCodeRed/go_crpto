@@ -8,10 +8,11 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/rohitCodeRed/go_crypto/blockchain"
+	"github.com/rohitCodeRed/go_crypto/config"
 	"github.com/rohitCodeRed/go_crypto/controllers"
 )
 
-func Router(b *blockchain.BlockChain) http.Handler {
+func Router(b *blockchain.BlockChain, app *config.AppConfig) http.Handler {
 	r := gin.New()
 
 	r.Use(gin.LoggerWithFormatter(func(param gin.LogFormatterParams) string {
@@ -32,7 +33,7 @@ func Router(b *blockchain.BlockChain) http.Handler {
 
 	// Recovery middleware recovers from any panics and writes a 500 if there was one.
 	r.Use(gin.Recovery())
-	r.Use(Authenticate(b))
+	//r.Use(Authenticate(b))
 
 	// routes := e.Group("/api")
 	// {
@@ -41,13 +42,14 @@ func Router(b *blockchain.BlockChain) http.Handler {
 	// 	routes.POST("/read", readEndpoint)
 	// }
 	r.GET("/", func(c *gin.Context) {
-		c.JSON(
-			http.StatusOK,
-			gin.H{
-				"code":    http.StatusOK,
-				"message": "Welcome to Crypto currency rocoin Node with address: " + b.GetUuidAddress(),
-			},
-		)
+		controllers.Repo.Home(c, b)
+		// c.JSON(
+		// 	http.StatusOK,
+		// 	gin.H{
+		// 		"code":    http.StatusOK,
+		// 		"message": "Welcome to Crypto currency rocoin Node with address: " + b.GetUuidAddress(),
+		// 	},
+		// )
 	})
 
 	r.POST("/login", controllers.Login)
