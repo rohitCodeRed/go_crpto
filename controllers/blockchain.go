@@ -30,10 +30,23 @@ func MineBlock(c *gin.Context, b *blockchain.BlockChain) {
 
 }
 
+type hashes struct {
+	Index int    `json:"index"`
+	Hash  string `json:"hash"`
+}
+
 func GetChain(c *gin.Context, b *blockchain.BlockChain) {
 	block := b.CHAIN
+	hashVar := make([]hashes, 0)
+
+	for _, bl := range block {
+		hash := hashes{Index: bl.Index, Hash: blockchain.Hash(bl)}
+		hashVar = append(hashVar, hash)
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"chain":  block,
+		"hashes": hashVar,
 		"length": len(block)})
 }
 
