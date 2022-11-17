@@ -2,7 +2,8 @@
 
 var USERS=['Rahul','Coder',"Hacker"];
 var CURRENT_USER_INFO={"name":"Rohit","url":"localhost:4000"};
-
+var AMOUNT = 0.0
+var SERVER_UUID = ""
 var NODES=[
     {"address":"localhost:4001","name":"Rahul"},
     {"address":"localhost:4002","name":"Coder"},
@@ -91,6 +92,9 @@ function listUsers(data){
         fullHtml = fullHtml+`<li><a class="dropdown-item" data-sender-name="${CURRENT_USER_INFO.name}" data-sender-url="${CURRENT_USER_INFO.url}" data-reciever-url="${element.address}" data-reciever-name="${element.name}" href="#">${element.name}</a></li>`;
     });
 
+    if(data.length == 0){
+        fullHtml=`<li><p>No User Available..</p></li>`;
+    }
     let domElem = htmlToElements(fullHtml);
     //console.log("dom Elem: ",domElem);
     return domElem;
@@ -152,7 +156,13 @@ function addTransactions(data){
     // data.forEach(tranx => {
         
     // });
-
+    if(data.length ==0){
+        fullHtml=`<div class="card">
+        <div class="card-body">
+          <h4 class="card-subtitle mb-2 ">No Transactions Available</h4>
+          </div> 
+          </div>`;
+    }
     let domElem = htmlToElements(fullHtml);
     //console.log("dom Elem: ",domElem);
     return domElem;
@@ -246,6 +256,12 @@ function addBlocks(data){
             <input type="number" readonly class="form-control-plaintext" value="${block.transactions.length.toString()}">
         </div>
         </div>
+        <div class="row">
+        <label class="col-3 col-form-label"><strong>TimeStamp:</strong></label>
+        <div class="col-9">
+            <input type="text" readonly class="form-control-plaintext" value="${block.dateTime}">
+        </div>
+        </div>
         </div>
         </div>
         </div>`;
@@ -257,6 +273,11 @@ function addBlocks(data){
     return domElem;
 }
 
+function refreshInfo(){
+    document.getElementById('cUserName').textContent = CURRENT_USER_INFO.name;
+    document.getElementById('sUuid').textContent = SERVER_UUID;
+    document.getElementById('cAmount').textContent = AMOUNT;  
+}
 
 function showAlert() {
     alert("Ive Been Clicked!!");
@@ -266,15 +287,16 @@ function showAlert() {
 
 var mineBtn = document.querySelector('.mineBtn');
 mineBtn.addEventListener('click', function () {
-    refreshTransaction();
-    refreshBlocks();
+    // refreshTransaction();
+    // refreshBlocks();
+
+
 });
 
   //var sendBtn = document.getElementById('sendMenuBtn');
 var sendMenuBtn = document.getElementById('sendMenuBtn')
 sendMenuBtn.addEventListener('show.bs.dropdown', function () {
-    // do something...
-    refreshUlist();
+    //..
 });
 
 var sendCoinBtn = document.getElementById('sendCoinBtn')
@@ -285,7 +307,7 @@ sendCoinBtn.addEventListener('click', function () {
     let recieverUrl = document.getElementById('recieverName').getAttribute('data-address');
     let amount = document.getElementById('sendCoinInput').value.toString();
 
-    console.log(senderName,senderUrl,recieverName,recieverUrl,amount)
+    //console.log(senderName,senderUrl,recieverName,recieverUrl,amount)
 });
 
 
@@ -296,6 +318,43 @@ sendCoinBtn.addEventListener('click', function () {
 
 //----------Socket code start-----------------------------------
 
+    let socket = new WebSocket('ws://localhost:4000/socket_conn');
+        //console.log(socket);
+
+    // Connection opened
+    socket.addEventListener('open', (event) => {
+        socket.send('Hello Server!, Send latest changed data..');
+    });
+
+    // Listen for messages
+    socket.addEventListener('message', (event) => {
+        console.log(event.data)
+        let serverData = JSON.parse(event.data);
+        BLOCKS.chain = serverData.chain;
+        BLOCKS.hashes = serverData.hash;
+        CURRENT_USER_INFO.name = serverData.name;
+        CURRENT_USER_INFO.url = serverData.url;
+        if(typeof serverData.nodes !== 'undefined'){
+            NODES = serverData.nodes;
+        }
+        TRANSACTIONS = serverData.transactions;
+        AMOUNT = parseFloat(serverData.amount);
+        SERVER_UUID = serverData.uuid;
+    
+        refreshUlist();
+        refreshTransaction();
+        refreshBlocks();
+        refreshInfo();
+
+    });
+
+    socket.addEventListener('close',()=>{
+        console.log("Connection got closed.. bye bye server");
+    });
+
+    socket.addEventListener("error",(err)=>{
+        console.log("Error occured", err);
+    });
 
 
 //----------Socket code end------------------------------------

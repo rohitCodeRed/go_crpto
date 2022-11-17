@@ -25,6 +25,7 @@ func GetRealTimeData(c *gin.Context, b *blockchain.BlockChain) {
 		_, op, err := wsutil.ReadClientData(conn)
 		if err != nil {
 			log.Printf("read message error: %v", err)
+			b.IsBlockChanged = true
 			return
 		}
 
@@ -46,15 +47,14 @@ func GetRealTimeData(c *gin.Context, b *blockchain.BlockChain) {
 }
 
 type BlockInfo struct {
-	CHAIN          []model.Block       `json:"chain"`
-	TRANSACTIONS   []model.Transaction `json:"transactions"`
-	NODES          []model.Node        `json:"nodes"`
-	Uuid           string              `json:"uuid"`
-	TOTAL_AMOUNT   float64             `json:"amount"`
-	IsBlockChanged bool
-	UserName       string   `json:"name"`
-	Url            string   `json:"url"`
-	Hash           []hashes `json:"hash"`
+	CHAIN        []model.Block       `json:"chain"`
+	TRANSACTIONS []model.Transaction `json:"transactions"`
+	NODES        []model.Node        `json:"nodes"`
+	Uuid         string              `json:"uuid"`
+	TOTAL_AMOUNT float64             `json:"amount"`
+	UserName     string              `json:"name"`
+	Url          string              `json:"url"`
+	Hash         []hashes            `json:"hash"`
 }
 
 func GetBlockInfoForSocket(b *blockchain.BlockChain) *BlockInfo {

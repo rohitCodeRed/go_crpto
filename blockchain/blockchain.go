@@ -37,6 +37,7 @@ func (b *BlockChain) New() string {
 	b.Create_block(1, "0")
 	b.Uuid = uuid.New().String()
 	b.IsBlockChanged = true
+	b.NODES = []model.Node{}
 	return b.Uuid
 }
 
