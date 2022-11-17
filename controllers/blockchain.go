@@ -9,6 +9,17 @@ import (
 	"github.com/rohitCodeRed/go_crypto/model"
 )
 
+type hashes struct {
+	Index int    `json:"index"`
+	Hash  string `json:"hash"`
+}
+
+type transaction struct {
+	Sender   string `json:"sender"`
+	Reciever string `json:"reciever"`
+	Amount   int    `json:"amount"`
+}
+
 func MineBlock(c *gin.Context, b *blockchain.BlockChain) {
 	previous_block := b.Get_previous_block()
 	previous_proof := previous_block.Proof
@@ -28,11 +39,6 @@ func MineBlock(c *gin.Context, b *blockchain.BlockChain) {
 		"previous_hash": block.Previous_hash,
 		"transactions":  block.Transactions})
 
-}
-
-type hashes struct {
-	Index int    `json:"index"`
-	Hash  string `json:"hash"`
 }
 
 func GetChain(c *gin.Context, b *blockchain.BlockChain) {
@@ -59,12 +65,6 @@ func IsChainValid(c *gin.Context, b *blockchain.BlockChain) {
 	}
 	c.JSON(http.StatusOK, gin.H{
 		"chain": "May Day, we have a problem. The Blockchain is not valid."})
-}
-
-type transaction struct {
-	Sender   string `json:"sender"`
-	Reciever string `json:"reciever"`
-	Amount   int    `json:"amount"`
 }
 
 func AddTransaction(c *gin.Context, b *blockchain.BlockChain) {

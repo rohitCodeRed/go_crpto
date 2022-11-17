@@ -15,10 +15,14 @@ import (
 )
 
 type BlockChain struct {
-	CHAIN        []model.Block       `json:"chain"`
-	TRANSACTIONS []model.Transaction `json:"transactions"`
-	NODES        []model.Node        `json:"nodes"`
-	Uuid         string              `json:"uuid"`
+	CHAIN          []model.Block       `json:"chain"`
+	TRANSACTIONS   []model.Transaction `json:"transactions"`
+	NODES          []model.Node        `json:"nodes"`
+	Uuid           string              `json:"uuid"`
+	TOTAL_AMOUNT   float64             `json:"amount"`
+	UserName       string              `json:"name"`
+	Url            string              `json:"url"`
+	IsBlockChanged bool
 }
 
 // var Uuuid string
@@ -32,6 +36,7 @@ func (b *BlockChain) New() string {
 	b.TRANSACTIONS = []model.Transaction{}
 	b.Create_block(1, "0")
 	b.Uuid = uuid.New().String()
+	b.IsBlockChanged = true
 	return b.Uuid
 }
 
@@ -46,6 +51,9 @@ func (b *BlockChain) Create_block(proof int, previous_hash string) model.Block {
 	b.TRANSACTIONS = []model.Transaction{}
 
 	b.CHAIN = append(b.CHAIN, newBlock)
+
+	b.IsBlockChanged = true //data chnaged...
+
 	return newBlock
 
 }
@@ -86,12 +94,14 @@ func (b *BlockChain) Add_transaction(sender string, reciever string, amount int)
 	b.TRANSACTIONS = append(b.TRANSACTIONS, pTransaction)
 	prevBlock := b.Get_previous_block()
 
+	b.IsBlockChanged = true
 	return prevBlock.Index
 }
 
 func (b *BlockChain) Add_node(node *model.Node) {
 	pNode := model.Node{Address: node.Address, Name: node.Name}
 	b.NODES = append(b.NODES, pNode)
+	b.IsBlockChanged = true
 }
 
 func (b *BlockChain) Replace_node_chain() bool {
@@ -126,6 +136,7 @@ func (b *BlockChain) Replace_node_chain() bool {
 
 	if len(longest_chain) > 0 {
 		b.CHAIN = longest_chain
+		b.IsBlockChanged = true
 		return true
 	}
 

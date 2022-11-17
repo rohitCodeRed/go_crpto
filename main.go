@@ -13,6 +13,9 @@ import (
 	"github.com/rohitCodeRed/go_crypto/routes"
 )
 
+const USERNAME = "Rohit"
+const URL = "localhost:4000"
+
 func main() {
 	var b blockchain.BlockChain
 	var app config.AppConfig
@@ -30,6 +33,9 @@ func main() {
 	controllers.NewHandler(repo)
 
 	b.New()
+	b.UserName = USERNAME
+	b.Url = URL
+
 	fmt.Println("Server Unique Address: ", b.GetUuidAddress())
 	//fmt.Println(node_address)
 

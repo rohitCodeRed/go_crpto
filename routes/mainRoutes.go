@@ -78,6 +78,10 @@ func Router(b *blockchain.BlockChain, app *config.AppConfig) http.Handler {
 		controllers.Replace_chain(c, b)
 	})
 
+	r.GET(("/socket_conn"), func(c *gin.Context) {
+		controllers.GetRealTimeData(c, b)
+	})
+
 	return r
 }
 
