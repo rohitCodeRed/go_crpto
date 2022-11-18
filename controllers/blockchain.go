@@ -15,22 +15,32 @@ type hashes struct {
 }
 
 type transaction struct {
-	Sender   string `json:"sender"`
-	Reciever string `json:"reciever"`
-	Amount   int    `json:"amount"`
+	Sender   string  `json:"sender"`
+	Reciever string  `json:"reciever"`
+	Amount   float64 `json:"amount"`
 }
 
 func MineBlock(c *gin.Context, b *blockchain.BlockChain) {
+	if len(b.TRANSACTIONS) == 0 {
+		c.JSON(http.StatusOK, gin.H{"message": "Transaction are not available.."})
+		return
+	}
 	previous_block := b.Get_previous_block()
 	previous_proof := previous_block.Proof
 	proof := blockchain.Proof_of_work(previous_proof)
 	previous_hash := blockchain.Hash(previous_block)
 	sender := b.GetUuidAddress()
-	reciever := "you"
-	amount := 1
+	reciever := b.UserName
+	amount := 1.0
 	b.Add_transaction(sender, reciever, amount)
 
 	block := b.Create_block(proof, previous_hash)
+
+	b.UpdateAmount()
+	UpdateDataForUser(b.UserName, b)
+
+	//ping to other node to update block..
+	b.Ping_other_nodes_to_replaceChain()
 
 	c.JSON(http.StatusOK, gin.H{"message": "Block Mined succesfully",
 		"index":         block.Index,
@@ -75,8 +85,11 @@ func AddTransaction(c *gin.Context, b *blockchain.BlockChain) {
 	}
 
 	index := b.Add_transaction(data.Sender, data.Reciever, data.Amount)
+	UpdateDataForUser(b.UserName, b)
+
+	b.Ping_nodes_to_add_transaction(data.Sender, data.Reciever, data.Amount)
 	c.JSON(http.StatusOK, gin.H{
-		"message": "This transaction will be added to Block with index: " + strconv.Itoa(index)})
+		"message": "This transaction will be added with index: " + strconv.Itoa(index)})
 
 }
 
@@ -92,6 +105,7 @@ func ConnectNode(c *gin.Context, b *blockchain.BlockChain) {
 		b.Add_node(&node)
 	}
 
+	UpdateDataForUser(b.UserName, b)
 	c.JSON(http.StatusOK, gin.H{
 		"message": "All nodes are connected", "nodes_length": len(nodes)})
 
@@ -103,6 +117,8 @@ func Replace_chain(c *gin.Context, b *blockchain.BlockChain) {
 		c.JSON(http.StatusOK, gin.H{"message": "No need to replace chain."})
 		return
 	}
+	b.UpdateAmount()
+	UpdateDataForUser(b.UserName, b)
 	c.JSON(http.StatusOK, gin.H{"message": "Chain Replaced succesfully."})
 
 }

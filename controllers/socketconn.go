@@ -17,6 +17,17 @@ func GetRealTimeData(c *gin.Context, b *blockchain.BlockChain) {
 		log.Printf("upgrade error: %s", err)
 		return
 	}
+	// store connections
+	if len(b.SocketConnections) > 0 {
+		for index, pConn := range b.SocketConnections {
+			if pConn.User == b.UserName {
+				b.SocketConnections[index].Conn = conn
+			}
+		}
+	} else {
+		b.SocketConnections = append(b.SocketConnections, blockchain.SocketInfo{Conn: conn, Opcode: 0x1, User: b.UserName})
+	}
+
 	log.Println("Client connected info: ", c.Request.Header)
 
 	defer conn.Close()
@@ -29,13 +40,15 @@ func GetRealTimeData(c *gin.Context, b *blockchain.BlockChain) {
 			return
 		}
 
+		log.Println("op-----------:", op)
+
 		if b.IsBlockChanged {
 			jsonBlock, err := json.Marshal(GetBlockInfoForSocket(b))
 			if err != nil {
 				log.Println("error:", err)
 			}
 
-			err = wsutil.WriteServerMessage(conn, op, jsonBlock)
+			err = wsutil.WriteServerMessage(conn, 0x1, jsonBlock)
 			if err != nil {
 				log.Printf("write message error: %v", err)
 				return
@@ -68,4 +81,23 @@ func GetBlockInfoForSocket(b *blockchain.BlockChain) *BlockInfo {
 
 	blockInfo := BlockInfo{CHAIN: b.CHAIN, TRANSACTIONS: b.TRANSACTIONS, NODES: b.NODES, Uuid: b.Uuid, TOTAL_AMOUNT: b.TOTAL_AMOUNT, Hash: hashVar, UserName: b.UserName, Url: b.Url}
 	return &blockInfo
+}
+
+func UpdateDataForUser(username string, b *blockchain.BlockChain) {
+	for _, val := range b.SocketConnections {
+		if val.User == username {
+			cConn := val.Conn
+			jsonBlock, err := json.Marshal(GetBlockInfoForSocket(b))
+			if err != nil {
+				log.Println("error:", err)
+			}
+
+			err = wsutil.WriteServerMessage(cConn, ws.OpCode(val.Opcode), jsonBlock)
+			if err != nil {
+				log.Printf("write message error: %v", err)
+				return
+			}
+			b.IsBlockChanged = false
+		}
+	}
 }

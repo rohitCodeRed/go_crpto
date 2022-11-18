@@ -26,18 +26,18 @@ func NewHandler(r *Repository) {
 
 func (m *Repository) Home(c *gin.Context, b *blockchain.BlockChain) {
 	//fmt.Fprintf(w, "this is the home page")
-	render.RenderTemplate(c, "home.page.tmpl", &model.CoinData{})
+	render.RenderTemplate(c, "home.page.tmpl", &model.CoinData{Uuid: b.Uuid, UserName: b.UserName, Url: b.Url})
 }
 
-func (m *Repository) About(c *gin.Context, b *blockchain.BlockChain) {
+// func (m *Repository) About(c *gin.Context, b *blockchain.BlockChain) {
 
-	stringMap := make(map[string]string)
-	stringMap["test"] = "Hello, again"
+// 	stringMap := make(map[string]string)
+// 	stringMap["test"] = "Hello, again"
 
-	//m.App.Session.
+// 	//m.App.Session.
 
-	render.RenderTemplate(c, "about.page.tmpl", &model.CoinData{
-		StringMap: stringMap,
-	})
+// 	render.RenderTemplate(c, "about.page.tmpl", &model.CoinData{
+// 		StringMap: stringMap,
+// 	})
 
-}
+// }

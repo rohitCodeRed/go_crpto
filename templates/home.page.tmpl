@@ -1,5 +1,648 @@
 {{ template "base" .}}
 
 {{define "content"}}
-    <h1>This is home Page</h1>
+        
+<div class="p-3 bg-secondary text-white">
+    <h1>RoCoin</h1>
+    <p>A crptocurrency which developed with blockchain technology</p>
+  </div>
+  <div class="container-fluid" id="user">
+    <div class="outer-grid">
+      <div class="user-info">
+        <div class="username">
+          <h4 id="cUserName" data-address="{{.Url}}" data-username="{{.UserName}}">{{.UserName}}</h4>
+          <span class="text-muted">(node/user Name)</span>
+        </div>
+        <div class="amount">
+          <h4 id="cAmount">5.2</h4>
+          <span class="text-muted">(Total Rocoin)</span>
+        </div>
+        <div class="addId">
+          <h5 id="sUuid">{{.Uuid}}</h5>
+          <span class="text-muted">(Node address)</span>
+        </div>
+        <div class="mineDiv">
+          <button type="button" class="btn btn-outline-success mineBtn">Mine</button>
+        </div>
+        <div class="sendDiv">
+          <div class="dropdown">
+            <button class="btn btn-info dropdown-toggle" type="button" id="sendMenuBtn" data-bs-toggle="dropdown" aria-expanded="false">
+              Send
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="sendMenuBtn"></ul>
+          </div>
+        </div>
+      </div>
+      <div class="transaction-list"></div>
+      </div>
+      
+    </div>
+  <!-- </div> -->
+  <hr class="rounded">
+  
+  <div class="p-3 bg-light text-black">
+    <h4>Mined Blocks</h4>
+  </div>
+  <div class="container-fluid" id="block-chain">
+    <div class="outer-block"></div>
+  </div>
+
+  <div class="modal fade modal-dialog-scrollable" id="tranxModal" data-bs-backdrop="static"  tabindex="-1" aria-labelledby="tranxModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="tranxModalLabel">""</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <div id="mine-transactions"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="sendCoinModal" data-bs-backdrop="static" tabindex="-2" aria-labelledby="sendCoinModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="sendCoinModalLabel">Send Coin</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col">
+                        <div class="tElem">
+                            <center>
+                            <div id="senderName" data-address="">""</div>
+                            <div class="text-muted">(sender)</div>
+                            </div></center>
+                        </div>
+                        <div class="col-1">
+                        <svg width="16" height="16" fill="currentColor" class="bi bi-arrow-right" viewBox="0 0 16 16">
+                            <path fill-rule="evenodd" d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8z"/>
+                        </svg>
+                        </div>
+                        <div class="col">
+                        <div class="tElem"><center>
+                            <div id="recieverName" data-address="">""</div>
+                            <div class="text-muted">(reciever)</div></center>
+                        </div>
+                        </div>
+                        <div class="col">
+                        <div class="tElem"><center>
+                            <div><input type="number" class="form-control-plaintext" id="sendCoinInput" value="0.0"></div>
+                            <div class="text-muted">(Enter Amount)</div></center>
+                        </div>
+                        </div>
+                    </div>
+              </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary" id="sendCoinBtn">Send</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+{{end}}
+
+
+
+
+
+
+
+
+
+
+{{define "css"}}
+    <style>
+        hr.rounded {
+        border-top: 1px solid #bbb;
+        border-radius: 2px;
+        margin-left:5px;
+        margin-right:5px;
+    }
+    
+    .outer-block{
+        display:flex;
+        flex-wrap:nowrap;
+        flex-direction:column;
+        height:40vh;
+        overflow: scroll;
+        overflow-x: hidden; 
+        align-items:center;
+    /*   width:100%; */
+    }
+    .outer-block > .card{
+        width:60%;
+    }
+    .arrow-up{
+        margin-top:4px;
+        margin-bottom:4px;
+    /*   align-self:center; */
+    }
+    
+    .outer-grid{
+        display: grid;
+        grid-template-columns: 50% 50%;
+        grid-template-rows: auto;
+        grid-template-areas: 
+        "userInfo transaction";
+    }
+    
+    .transaction-list {
+        grid-area: transaction;
+        height:40vh;
+        overflow: scroll;
+    }
+    .user-info {
+        grid-area: userInfo;
+        display:grid;
+        grid-template-columns: auto auto auto;
+        grid-template-rows: 13vh 13vh 14vh;
+        grid-template-areas: 
+        "username . amount"
+        "addId  addId  addId"
+        ". mineBtn sendBtn";
+    }
+    
+    .username{
+        grid-area: username;
+    /*   justify-self:center; */
+        align-self: center;
+    }
+    
+    .amount{
+        grid-area: amount;
+        align-self: center;
+    }
+    .addId{
+        grid-area: addId;
+        align-self: center;
+    }
+    .mineDiv{
+        grid-area: mineBtn;
+        align-self: center;
+    }
+    .mineDiv >button{
+        width:96px;
+        height:48px;
+    }
+    .sendDiv > .dropdown > button{
+        width:96px;
+        height:48px;
+    }
+    
+    .sendDiv{
+        grid-area: sendBtn;
+        align-self: center;
+    }
+    
+    .containerd {
+        display: grid;
+        grid-template-columns: auto auto;
+        grid-template-rows: auto;
+        grid-template-areas: 
+        "userInfo transaction";
+    }
+    
+    /* width */
+    .transaction-list::-webkit-scrollbar {
+        width: 5px;
+    }
+    
+    /* Track */
+    .transaction-list::-webkit-scrollbar-track {
+        box-shadow: inset 0 0 5px white; 
+        border-radius: 10px;
+    }
+    
+    /* Handle */
+    .transaction-list::-webkit-scrollbar-thumb {
+        background: red; 
+        border-radius: 10px;
+    }
+    
+    /* Handle on hover */
+    .transaction-list::-webkit-scrollbar-thumb:hover {
+        background: #b30000; 
+    }
+    
+    /* width */
+    .outer-block::-webkit-scrollbar {
+        width: 5px;
+    }
+    
+    /* Track */
+    .outer-block::-webkit-scrollbar-track {
+        box-shadow: inset 0 0 5px white; 
+        border-radius: 10px;
+    }
+    
+    /* Handle */
+    .outer-block::-webkit-scrollbar-thumb {
+        background: red; 
+        border-radius: 10px;
+    }
+    
+    /* Handle on hover */
+    .outer-block::-webkit-scrollbar-thumb:hover {
+        background: #b30000; 
+    }
+
+    </style>
+{{end}}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+{{define "js"}}
+    <script>
+        // Page loads - script is called
+    var uName = document.getElementById("cUserName").getAttribute("data-username");
+    var uUrl = document.getElementById("cUserName").getAttribute("data-address");
+
+    var CURRENT_USER_INFO={"name":uName,"url":uUrl};
+    var AMOUNT = 0.0
+    var SERVER_UUID = ""
+    var NODES=[
+        {"address":"http://localhost:4001","name":"Rahul"},
+        {"address":"http://localhost:4002","name":"Miner"} 
+    ]
+    var TRANSACTIONS=[
+        {"sender":"Rohit","reciever":"Coder","amount":1},
+        {"sender":"Rohit","reciever":"Coder","amount":1}
+    ];
+
+    var BLOCKS ={
+        "hashes":[],
+        "chain":[]
+    }
+
+    var sendCoinModal = new bootstrap.Modal(document.getElementById('sendCoinModal'), {
+        keyboard: false
+    });
+    
+    var transactionModal = new bootstrap.Modal(document.getElementById('tranxModal'), {
+        keyboard: false
+    });
+
+    function refreshUlist(){
+        var uList = document.querySelector('.dropdown-menu');
+        if (uList.hasChildNodes()) {
+            uList.textContent="";
+            uList.append(...listUsers(NODES));
+        }else{
+            uList.append(...listUsers(NODES));
+        }
+
+        var nodes= document.querySelectorAll('.dropdown-item');
+        for(var i = 0 ; i < nodes.length ; i++) {
+            nodes[i].addEventListener('click', function() {
+                //alert('You clicked ' + this.getAttribute('data-reciever'));
+                var pRName= document.getElementById("recieverName");
+                pRName.textContent = this.getAttribute('data-reciever-name');
+                pRName.setAttribute('data-address',this.getAttribute('data-reciever-url'));
+
+                var pSName= document.getElementById("senderName");
+                pSName.textContent = this.getAttribute('data-sender-name');
+                pSName.setAttribute('data-address',this.getAttribute('data-sender-url'));
+                
+                sendCoinModal.show();
+
+            });
+        }
+    }
+
+    function listUsers(data){
+        var fullHtml='';
+        data.forEach(element => {
+            fullHtml = fullHtml+`<li><a class="dropdown-item" data-sender-name="${CURRENT_USER_INFO.name}" data-sender-url="${CURRENT_USER_INFO.url}" data-reciever-url="${element.address}" data-reciever-name="${element.name}" href="#">${element.name}</a></li>`;
+        });
+
+        if(data.length == 0){
+            fullHtml=`<li><p>No User Available..</p></li>`;
+        }
+        var domElem = htmlToElements(fullHtml);
+        //console.log("dom Elem: ",domElem);
+        return domElem;
+    }
+
+    function htmlToElements(html) {
+        var template = document.createElement('template');
+        template.innerHTML = html;
+        return template.content.childNodes;
+    }
+
+    //---------transaction code---------
+
+    function refreshTransaction(){
+        var uTrans = document.querySelector('.transaction-list');
+        if (uTrans.hasChildNodes()) {
+            uTrans.textContent="";
+            uTrans.append(...addTransactions(TRANSACTIONS));
+        }else{
+            uTrans.append(...addTransactions(TRANSACTIONS));
+        }
+    }
+    function addTransactions(data){
+        var fullHtml='';
+        for(var i=0;i<data.length;i++){
+            var tranx = data[i];
+            fullHtml = fullHtml+`<div class="card">
+            <div class="card-body">
+            <h6 class="card-subtitle mb-2 text-muted">Un Mined Transaction #${i + 1}</h6>
+            <div class="row">
+                <div class="col">
+                <div class="tElem">
+                    <center>
+                    <div><strong>${tranx.sender.toUpperCase() == CURRENT_USER_INFO.name.toUpperCase()? "you":tranx.sender}</strong></div>
+                    <div class="text-muted">(sender)</div>
+                    </div></center>
+                </div>
+                <div class="col-1">
+                <svg width="16" height="16" fill="currentColor" class="bi bi-arrow-right" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8z"/>
+                </svg>
+                </div>
+                <div class="col">
+                <div class="tElem"><center>
+                    <div><strong>${tranx.reciever.toUpperCase() == CURRENT_USER_INFO.name.toUpperCase()? "you":tranx.reciever}</strong></div>
+                    <div class="text-muted">(reciever)</div></center>
+                </div>
+                </div>
+                <div class="col">
+                <div class="tElem"><center>
+                    <div><strong>${tranx.amount.toString()}</strong></div>
+                    <div class="text-muted">(amount)</div></center>
+                </div>
+                </div>
+            </div>
+            </div>
+        </div>`;
+        }
+        // data.forEach(tranx => {
+            
+        // });
+        if(data.length ==0){
+            fullHtml=`<div class="card">
+            <div class="card-body">
+            <h4 class="card-subtitle mb-2 ">No Transactions Available</h4>
+            </div> 
+            </div>`;
+        }
+        var domElem = htmlToElements(fullHtml);
+        //console.log("dom Elem: ",domElem);
+        return domElem;
+    }
+
+    //--Block code----------
+    function refreshBlocks(){
+        var uBlock = document.querySelector('.outer-block');
+        if (uBlock.hasChildNodes()) {
+            uBlock.textContent="";
+            uBlock.append(...addBlocks(BLOCKS));
+        }else{
+            uBlock.append(...addBlocks(BLOCKS));
+        }
+
+
+        var nodes= document.querySelectorAll('.blockCard');
+        for(var i = 0 ; i < nodes.length ; i++) {
+            nodes[i].addEventListener('click', function() {
+                var pIndex = parseInt(this.getAttribute('data-block-index'));
+                var pId = parseInt(this.getAttribute('data-block-index')) + 1;
+                //alert('You clicked ' + this.getAttribute('data-block-index'));
+                var pLabel= document.getElementById("tranxModalLabel");
+                pLabel.textContent = `Mined Transactions for Block #${pId.toString()}`;
+
+                var mineTranx = document.getElementById("mine-transactions");
+
+                mineTranx.textContent="";
+                //var pIndex = parseInt(this.getAttribute('data-block-index'));
+                mineTranx.append(...addTransactions(getBlockTransaction(pIndex,BLOCKS.chain)));
+
+                transactionModal.show();
+
+            });
+        }
+    }
+
+    function getBlockTransaction(index,data){
+        var pIndex = data.findIndex(function(elem){
+            return elem.index == index;
+        });
+
+        return data[pIndex]["transactions"];
+    }
+
+    function addBlocks(data){
+        var fullHtml='';
+        var hashes = data.hashes;
+        var mappedHashes =  new Map();
+        hashes.forEach(elem => {
+            mappedHashes.set(elem.index, elem.hash);
+        });
+
+        var chains = data.chain;
+        chains.sort(function(a, b){return b.index - a.index});
+
+        for(var i=0;i<chains.length;i++){
+            var block = chains[i];
+            //console.log(block);
+            if(i != 0){
+                fullHtml = fullHtml+`<div class="arrow-up"><svg width="32" height="32" fill="currentColor" class="bi bi-arrow-up" viewBox="0 0 16 16">
+                <path fill-rule="evenodd" d="M8 15a.5.5 0 0 0 .5-.5V2.707l3.146 3.147a.5.5 0 0 0 .708-.708l-4-4a.5.5 0 0 0-.708 0l-4 4a.5.5 0 1 0 .708.708L7.5 2.707V14.5a.5.5 0 0 0 .5.5z"/>
+            </svg></div>`;
+            }
+
+            fullHtml = fullHtml+`<div class="card blockCard" data-block-index="${block.index.toString()}">
+            <div class="card-body">
+            <h5 class="card-title text-muted">Block #${(block.index + 1).toString()}</h5>
+            <div class="block-info">
+                <div class="row">
+            <label class="col-3 col-form-label"><strong>Hash:</strong></label>
+            <div class="col-9">
+                <input type="text" readonly class="form-control-plaintext" value="${mappedHashes.get(block.index)}">
+            </div>
+            </div>
+                <div class="row">
+            <label class="col-3 col-form-label"><strong>Nonce:</strong></label>
+            <div class="col-9">
+                <input type="number" readonly class="form-control-plaintext" value="${block.proof.toString()}">
+            </div>
+            </div>
+                <div class="row">
+                <label class="col-3 col-form-label"><strong>Prev hash:</strong></label>
+            <div class="col-9">
+                <input type="text" readonly class="form-control-plaintext" value="${block.previous_hash}">
+            </div>
+            </div>
+                <div class="row">
+            <label class="col-3 col-form-label"><strong>Transactions:</strong></label>
+            <div class="col-9">
+                <input type="number" readonly class="form-control-plaintext" value="${block.transactions.length.toString()}">
+            </div>
+            </div>
+            <div class="row">
+            <label class="col-3 col-form-label"><strong>TimeStamp:</strong></label>
+            <div class="col-9">
+                <input type="text" readonly class="form-control-plaintext" value="${block.dateTime}">
+            </div>
+            </div>
+            </div>
+            </div>
+            </div>`;
+    
+        }
+
+        var domElem = htmlToElements(fullHtml);
+        //console.log("dom Elem: ",domElem);
+        return domElem;
+    }
+
+    function refreshInfo(){
+        document.getElementById('cUserName').textContent = CURRENT_USER_INFO.name;
+        document.getElementById('sUuid').textContent = SERVER_UUID;
+        document.getElementById('cAmount').textContent = AMOUNT;  
+    }
+
+    function showAlert() {
+        alert("Ive Been Clicked!!");
+    }
+
+    //--------------------------ALL events code start-----------------
+
+    var mineBtn = document.querySelector('.mineBtn');
+    mineBtn.addEventListener('click', function () {
+        // refreshTransaction();
+        // refreshBlocks();
+        mineBlock();
+
+    });
+
+    //   //var sendBtn = document.getElementById('sendMenuBtn');
+    // var sendMenuBtn = document.getElementById('sendMenuBtn')
+    // sendMenuBtn.addEventListener('show.bs.dropdown', function () {
+    //     //..
+    //     //mineBlock();
+    // });
+
+    var sendCoinBtn = document.getElementById('sendCoinBtn')
+    sendCoinBtn.addEventListener('click', function () {
+        var senderUrl = document.getElementById('senderName').getAttribute('data-address');
+        var senderName = document.getElementById('senderName').textContent;
+        var recieverName = document.getElementById('recieverName').textContent;
+        var recieverUrl = document.getElementById('recieverName').getAttribute('data-address');
+        var amount = document.getElementById('sendCoinInput').value.toString();
+
+        var bodyData = {
+            "sender":senderName,"reciever":recieverName,"amount":parseFloat(amount)
+        }
+        callAddTransactionAPI(bodyData);
+        //console.log(senderName,senderUrl,recieverName,recieverUrl,amount)
+    });
+
+
+    //----------------------------Events code end--------------------
+
+    //------Ajax call for transaction-----------------------
+
+    function callAddTransactionAPI(data){
+        var post = JSON.stringify(data)
+        const url = "http:\/\/"+CURRENT_USER_INFO.url+"\/add_transaction"
+        var xhr = new XMLHttpRequest()
+        
+        xhr.open('POST', url, true)
+        xhr.setRequestHeader('Content-type', 'application\/json; charset=UTF-8')
+        xhr.send(post);
+        
+        xhr.onload = function () {
+            if(xhr.status === 200) {
+                console.log(xhr.response.message) 
+            }
+        }
+    }
+
+    function mineBlock(){
+        fetch("http:\/\/"+CURRENT_USER_INFO.url+"\/mine_block")
+        .then((response) => response.json())
+        .then((data) => {
+            if (!data.hasOwnProperty("index")){
+                alert(data.message);
+            }
+        });
+    }
+    //-----Ajax call end--------------------
+
+
+    //----------Socket code start-----------------------------------
+
+        var socket = new WebSocket("ws:\/\/"+CURRENT_USER_INFO.url+"\/socket_conn");
+            //console.log(socket);
+
+        // Connection opened
+        socket.addEventListener('open', (event) => {
+            socket.send('Hello Server!, Send latest changed data..');
+        });
+
+        // Listen for messages
+        socket.addEventListener('message', (event) => {
+            console.log(event.data)
+            var serverData = JSON.parse(event.data);
+            BLOCKS.chain = serverData.chain;
+            BLOCKS.hashes = serverData.hash;
+            //if(typeof serverData.nodes !== 'undefined'){
+              //  NODES = serverData.nodes;
+            //}
+            TRANSACTIONS = serverData.transactions;
+            AMOUNT = parseFloat(serverData.amount);
+            SERVER_UUID = serverData.uuid;
+        
+            refreshUlist();
+            refreshTransaction();
+            refreshBlocks();
+            refreshInfo();
+
+        });
+
+        socket.addEventListener('close',()=>{
+            console.log("Connection got closed.. bye bye server");
+        });
+
+        socket.addEventListener("error",(err)=>{
+            console.log("Error occured", err);
+        });
+
+
+    //----------Socket code end------------------------------------
+    
+        
+</script>
 {{end}}

@@ -11,9 +11,9 @@ type Node struct {
 }
 
 type Transaction struct {
-	Sender   string `json:"sender"`
-	Reciever string `json:"reciever"`
-	Amount   int    `json:"amount"`
+	Sender   string  `json:"sender"`
+	Reciever string  `json:"reciever"`
+	Amount   float64 `json:"amount"`
 }
 
 type Block struct {

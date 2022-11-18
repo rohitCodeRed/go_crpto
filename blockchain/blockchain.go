@@ -1,11 +1,14 @@
 package blockchain
 
 import (
+	"bytes"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
+	"net"
 	"net/http"
 	"strconv"
 	"time"
@@ -14,15 +17,21 @@ import (
 	"github.com/rohitCodeRed/go_crypto/model"
 )
 
+type SocketInfo struct {
+	Conn   net.Conn
+	Opcode byte
+	User   string
+}
 type BlockChain struct {
-	CHAIN          []model.Block       `json:"chain"`
-	TRANSACTIONS   []model.Transaction `json:"transactions"`
-	NODES          []model.Node        `json:"nodes"`
-	Uuid           string              `json:"uuid"`
-	TOTAL_AMOUNT   float64             `json:"amount"`
-	UserName       string              `json:"name"`
-	Url            string              `json:"url"`
-	IsBlockChanged bool
+	CHAIN             []model.Block       `json:"chain"`
+	TRANSACTIONS      []model.Transaction `json:"transactions"`
+	NODES             []model.Node        `json:"nodes"`
+	Uuid              string              `json:"uuid"`
+	TOTAL_AMOUNT      float64             `json:"amount"`
+	UserName          string              `json:"name"`
+	Url               string              `json:"url"`
+	IsBlockChanged    bool
+	SocketConnections []SocketInfo
 }
 
 // var Uuuid string
@@ -38,6 +47,7 @@ func (b *BlockChain) New() string {
 	b.Uuid = uuid.New().String()
 	b.IsBlockChanged = true
 	b.NODES = []model.Node{}
+	b.TOTAL_AMOUNT = 10.0
 	return b.Uuid
 }
 
@@ -54,7 +64,7 @@ func (b *BlockChain) Create_block(proof int, previous_hash string) model.Block {
 	b.CHAIN = append(b.CHAIN, newBlock)
 
 	b.IsBlockChanged = true //data chnaged...
-
+	//controllers.UpdateDataForUser(b.UserName,&b)
 	return newBlock
 
 }
@@ -90,7 +100,7 @@ func (b *BlockChain) Is_chain_valid(pChain []model.Block) bool {
 	return true
 }
 
-func (b *BlockChain) Add_transaction(sender string, reciever string, amount int) int {
+func (b *BlockChain) Add_transaction(sender string, reciever string, amount float64) int {
 	pTransaction := model.Transaction{Sender: sender, Reciever: reciever, Amount: amount}
 	b.TRANSACTIONS = append(b.TRANSACTIONS, pTransaction)
 	prevBlock := b.Get_previous_block()
@@ -112,7 +122,7 @@ func (b *BlockChain) Replace_node_chain() bool {
 
 	for _, node := range b.NODES {
 		url := node.Address
-		resp, err := http.Get(url + "/get_chain")
+		resp, err := http.Get("http://" + url + "/get_chain")
 		if err != nil {
 			log.Fatalln(err)
 		}
@@ -138,14 +148,67 @@ func (b *BlockChain) Replace_node_chain() bool {
 	if len(longest_chain) > 0 {
 		b.CHAIN = longest_chain
 		b.IsBlockChanged = true
+		b.TRANSACTIONS = []model.Transaction{}
 		return true
 	}
 
 	return false
 }
 
+func (b *BlockChain) Ping_other_nodes_to_replaceChain() {
+	for _, node := range b.NODES {
+		url := node.Address
+		resp, err := http.Get("http://" + url + "/replace_chain")
+		if err != nil {
+			log.Fatalln(err)
+		}
+
+		defer resp.Body.Close()
+	}
+}
+
+func (b *BlockChain) Ping_nodes_to_add_transaction(sender string, reciever string, amount float64) {
+	pTransaction := model.Transaction{Sender: sender, Reciever: reciever, Amount: amount}
+	postBody, _ := json.Marshal(pTransaction)
+	responseBody := bytes.NewBuffer(postBody)
+
+	for _, node := range b.NODES {
+		url := node.Address
+		resp, err := http.Post("http://"+url+"/add_transaction", "application/json", responseBody)
+		//Handle Error
+		if err != nil {
+			log.Fatalf("An Error Occured %v", err)
+		}
+
+		defer resp.Body.Close()
+		body, err := ioutil.ReadAll(resp.Body)
+
+		if err != nil {
+			log.Fatalln(err)
+		}
+		sb := string(body)
+		log.Printf(sb)
+	}
+}
+
 func (b *BlockChain) GetUuidAddress() string {
 	return b.Uuid
+}
+
+func (b *BlockChain) UpdateAmount() {
+	chain := b.CHAIN
+	for _, chainVal := range chain {
+		transactions := chainVal.Transactions
+		for _, transVal := range transactions {
+			if transVal.Reciever == b.UserName {
+				b.TOTAL_AMOUNT += transVal.Amount
+			}
+
+			if transVal.Sender == b.UserName {
+				b.TOTAL_AMOUNT -= transVal.Amount
+			}
+		}
+	}
 }
 
 func Proof_of_work(previous_proof int) int {
