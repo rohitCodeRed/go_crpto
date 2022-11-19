@@ -87,7 +87,7 @@ func AddTransaction(c *gin.Context, b *blockchain.BlockChain) {
 	index := b.Add_transaction(data.Sender, data.Reciever, data.Amount)
 	UpdateDataForUser(b.UserName, b)
 
-	b.Ping_nodes_to_add_transaction(data.Sender, data.Reciever, data.Amount)
+	b.Ping_nodes_to_update_transaction(data.Sender, data.Reciever, data.Amount)
 	c.JSON(http.StatusOK, gin.H{
 		"message": "This transaction will be added with index: " + strconv.Itoa(index)})
 

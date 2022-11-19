@@ -585,7 +585,11 @@
         
         xhr.onload = function () {
             if(xhr.status === 200) {
-                console.log(xhr.response.message) 
+                console.log(xhr.response.message)
+                sendCoinModal.hide() 
+            }else{
+                sendCoinModal.hide()
+                alert(xhr.response)
             }
         }
     }
@@ -614,7 +618,7 @@
 
         // Listen for messages
         socket.addEventListener('message', (event) => {
-            console.log(event.data)
+            //console.log(event.data)
             var serverData = JSON.parse(event.data);
             BLOCKS.chain = serverData.chain;
             BLOCKS.hashes = serverData.hash;

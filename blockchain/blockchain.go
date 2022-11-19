@@ -6,11 +6,11 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net"
 	"net/http"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/google/uuid"
@@ -103,10 +103,10 @@ func (b *BlockChain) Is_chain_valid(pChain []model.Block) bool {
 func (b *BlockChain) Add_transaction(sender string, reciever string, amount float64) int {
 	pTransaction := model.Transaction{Sender: sender, Reciever: reciever, Amount: amount}
 	b.TRANSACTIONS = append(b.TRANSACTIONS, pTransaction)
-	prevBlock := b.Get_previous_block()
+	//prevBlock := b.Get_previous_block()
 
 	b.IsBlockChanged = true
-	return prevBlock.Index
+	return len(b.TRANSACTIONS) - 1
 }
 
 func (b *BlockChain) Add_node(node *model.Node) {
@@ -167,28 +167,42 @@ func (b *BlockChain) Ping_other_nodes_to_replaceChain() {
 	}
 }
 
-func (b *BlockChain) Ping_nodes_to_add_transaction(sender string, reciever string, amount float64) {
-	pTransaction := model.Transaction{Sender: sender, Reciever: reciever, Amount: amount}
-	postBody, _ := json.Marshal(pTransaction)
-	responseBody := bytes.NewBuffer(postBody)
+func (b *BlockChain) Ping_nodes_to_update_transaction(sender string, reciever string, amount float64) {
+
+	var wg sync.WaitGroup
 
 	for _, node := range b.NODES {
-		url := node.Address
-		resp, err := http.Post("http://"+url+"/update_transaction", "application/json", responseBody)
-		//Handle Error
-		if err != nil {
-			log.Fatalf("An Error Occured %v", err)
+		pTransaction := model.Transaction{Sender: sender, Reciever: reciever, Amount: amount}
+		postBody, er1 := json.Marshal(pTransaction)
+		if er1 != nil {
+			log.Fatalf("An Error Occured %v", er1)
 		}
+		responseBody := bytes.NewBuffer(postBody)
 
-		defer resp.Body.Close()
-		body, err := ioutil.ReadAll(resp.Body)
+		wg.Add(1)
 
-		if err != nil {
-			log.Fatalln(err)
-		}
-		sb := string(body)
-		log.Printf(sb)
+		go func(node model.Node, rpBody *bytes.Buffer) {
+			defer wg.Done()
+			url := node.Address
+			resp, err := http.Post("http://"+url+"/update_transaction", "application/json", rpBody)
+			//Handle Error
+			if err != nil {
+				log.Fatalf("An Error Occured %v", err)
+			}
+
+			var res map[string]interface{}
+
+			json.NewDecoder(resp.Body).Decode(&res)
+
+			//fmt.Println(res["json"])
+			log.Println("Update Transactions...", res)
+			defer resp.Body.Close()
+
+		}(node, responseBody)
+
 	}
+
+	wg.Wait()
 }
 
 func (b *BlockChain) GetUuidAddress() string {
