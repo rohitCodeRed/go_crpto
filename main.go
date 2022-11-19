@@ -14,18 +14,19 @@ import (
 	"github.com/rohitCodeRed/go_crypto/routes"
 )
 
-const USERNAME = "Rohit"
+const USERNAME = "Rohit" //default user name
 const URL = "localhost"
-const PORT = "4000"
+const PORT = "4000" //default Port number
 const INITIAL_MONEY = 5.0
 
 func main() {
+	pUname := USERNAME
 	pUrl := URL
 	pPort := PORT
 
-	if len(os.Args) > 1 {
-		cPort := os.Args[1]
-		pPort = cPort
+	if len(os.Args) > 2 {
+		pUname = os.Args[1]
+		pPort = os.Args[2]
 	}
 	pUrlPort := pUrl + ":" + pPort
 
@@ -45,7 +46,7 @@ func main() {
 	controllers.NewHandler(repo)
 
 	b.New()
-	b.UserName = USERNAME
+	b.UserName = pUname
 	b.Url = pUrlPort
 	b.TOTAL_AMOUNT = INITIAL_MONEY
 
