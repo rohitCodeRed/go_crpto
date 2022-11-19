@@ -618,9 +618,9 @@
             var serverData = JSON.parse(event.data);
             BLOCKS.chain = serverData.chain;
             BLOCKS.hashes = serverData.hash;
-            //if(typeof serverData.nodes !== 'undefined'){
-              //  NODES = serverData.nodes;
-            //}
+            if(typeof serverData.nodes !== 'undefined'){
+                NODES = serverData.nodes;
+            }
             TRANSACTIONS = serverData.transactions;
             AMOUNT = parseFloat(serverData.amount);
             SERVER_UUID = serverData.uuid;
