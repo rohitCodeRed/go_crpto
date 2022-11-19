@@ -174,7 +174,7 @@ func (b *BlockChain) Ping_nodes_to_add_transaction(sender string, reciever strin
 
 	for _, node := range b.NODES {
 		url := node.Address
-		resp, err := http.Post("http://"+url+"/add_transaction", "application/json", responseBody)
+		resp, err := http.Post("http://"+url+"/update_transaction", "application/json", responseBody)
 		//Handle Error
 		if err != nil {
 			log.Fatalf("An Error Occured %v", err)

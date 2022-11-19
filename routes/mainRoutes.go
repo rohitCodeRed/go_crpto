@@ -69,6 +69,9 @@ func Router(b *blockchain.BlockChain, app *config.AppConfig) http.Handler {
 	r.POST("/add_transaction", func(c *gin.Context) {
 		controllers.AddTransaction(c, b)
 	})
+	r.POST("/update_transaction", func(c *gin.Context) {
+		controllers.UpdateTransaction(c, b)
+	})
 
 	r.POST("/connect_node", func(c *gin.Context) {
 		controllers.ConnectNode(c, b)

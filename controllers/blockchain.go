@@ -93,6 +93,22 @@ func AddTransaction(c *gin.Context, b *blockchain.BlockChain) {
 
 }
 
+func UpdateTransaction(c *gin.Context, b *blockchain.BlockChain) {
+	var data model.Transaction
+	if err := c.ShouldBindJSON(&data); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	index := b.Add_transaction(data.Sender, data.Reciever, data.Amount)
+	UpdateDataForUser(b.UserName, b)
+
+	//b.Ping_nodes_to_add_transaction(data.Sender, data.Reciever, data.Amount)
+	c.JSON(http.StatusOK, gin.H{
+		"message": "This transaction is updated with index: " + strconv.Itoa(index)})
+
+}
+
 func ConnectNode(c *gin.Context, b *blockchain.BlockChain) {
 	var nodes []model.Node
 
