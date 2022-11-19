@@ -47,7 +47,7 @@ func (b *BlockChain) New() string {
 	b.Uuid = uuid.New().String()
 	b.IsBlockChanged = true
 	b.NODES = []model.Node{}
-	b.TOTAL_AMOUNT = 10.0
+	b.TOTAL_AMOUNT = 0.0
 	return b.Uuid
 }
 

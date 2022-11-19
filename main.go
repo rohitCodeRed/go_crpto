@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/rohitCodeRed/go_crypto/blockchain"
@@ -14,9 +15,20 @@ import (
 )
 
 const USERNAME = "Rohit"
-const URL = "localhost:4000"
+const URL = "localhost"
+const PORT = "4000"
+const INITIAL_MONEY = 5.0
 
 func main() {
+	pUrl := URL
+	pPort := PORT
+
+	if len(os.Args) > 1 {
+		cPort := os.Args[1]
+		pPort = cPort
+	}
+	pUrlPort := pUrl + ":" + pPort
+
 	var b blockchain.BlockChain
 	var app config.AppConfig
 	app.InProduction = false
@@ -34,13 +46,14 @@ func main() {
 
 	b.New()
 	b.UserName = USERNAME
-	b.Url = URL
+	b.Url = pUrlPort
+	b.TOTAL_AMOUNT = INITIAL_MONEY
 
 	fmt.Println("Server Unique Address: ", b.GetUuidAddress())
 	//fmt.Println(node_address)
 
 	server := &http.Server{
-		Addr:         ":4000",
+		Addr:         ":" + pPort,
 		Handler:      routes.Router(&b, &app),
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
