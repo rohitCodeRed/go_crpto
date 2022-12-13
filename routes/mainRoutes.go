@@ -35,24 +35,12 @@ func Router(b *blockchain.BlockChain, app *config.AppConfig) http.Handler {
 	r.Use(gin.Recovery())
 	r.Use(CORSMiddleware())
 
-	// routes := e.Group("/api")
-	// {
-	// 	routes.POST("/login", loginEndpoint)
-	// 	routes.POST("/submit", submitEndpoint)
-	// 	routes.POST("/read", readEndpoint)
-	// }
 	r.GET("/", func(c *gin.Context) {
 		controllers.Repo.Home(c, b)
-		// c.JSON(
-		// 	http.StatusOK,
-		// 	gin.H{
-		// 		"code":    http.StatusOK,
-		// 		"message": "Welcome to Crypto currency rocoin Node with address: " + b.GetUuidAddress(),
-		// 	},
-		// )
+
 	})
 
-	r.POST("/login", controllers.Login)
+	//r.POST("/login", controllers.Login)
 
 	r.GET("/mine_block", func(c *gin.Context) {
 		controllers.MineBlock(c, b)
