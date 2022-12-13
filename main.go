@@ -50,6 +50,8 @@ func main() {
 	b.Url = pUrlPort
 	b.TOTAL_AMOUNT = INITIAL_MONEY
 
+	fmt.Println("Sever Name :", pUname)
+	fmt.Println("Sever running at port ", pPort)
 	fmt.Println("Server Unique Address: ", b.GetUuidAddress())
 	//fmt.Println(node_address)
 
